@@ -1,0 +1,158 @@
+/* Plain CSS version of app styles (no Tailwind @apply/@tailwind) */
+
+:root {
+  --accent: #7c3aed; /* violet-600 */
+  --accent-2: #06b6d4; /* cyan-500 */
+  --muted: #6b7280; /* gray-500 */
+  --bg-dark: #0f172a; /* near tailwind gray-900 */
+  --card-border: #f3f4f6;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  color: #111827;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+@media (prefers-color-scheme: dark) {
+  html, body { background: var(--bg-dark); color: #f9fafb; }
+}
+
+/* Reusable container */
+.app-container {
+  max-width: 48rem; /* approx max-w-3xl */
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2.5rem 1.5rem;
+}
+
+/* Card */
+.card {
+  background: #ffffff;
+  border: 1px solid var(--card-border);
+  border-radius: 1rem; /* rounded-2xl */
+  padding: 1.5rem;
+  box-shadow: 0 10px 15px rgba(2,6,23,0.06);
+  color: inherit;
+}
+@media (prefers-color-scheme: dark) {
+  .card { background: #111827; border-color: #111827; }
+}
+
+/* Headings */
+.title {
+  font-size: 1.875rem; /* 3xl */
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: inherit;
+}
+.subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+@media (prefers-color-scheme: dark) { .subtitle { color: #9ca3af; } }
+
+/* Inputs and buttons (simplified) */
+.input {
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem 1rem;
+  background: rgba(255,255,255,0.6);
+  color: inherit;
+  box-sizing: border-box;
+}
+@media (prefers-color-scheme: dark) { .input { background: #1f2937; border-color: #374151; color: #f9fafb; } }
+.input:focus { outline: none; box-shadow: 0 0 0 3px rgba(124,58,237,0.18); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 0.5rem; padding: 0.5rem 1rem;
+  background: var(--accent); color: #fff; font-weight: 600; cursor: pointer;
+  box-shadow: 0 6px 10px rgba(124,58,237,0.12); transition: transform 0.12s ease, background-color 0.12s ease;
+}
+.btn:hover { background: #5b21b6; transform: translateY(-2px); }
+.btn:active { transform: translateY(2px); }
+
+.btn-ghost {
+  display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; padding:0.5rem 1rem;
+  border: 1px solid #e5e7eb; background: transparent; color: #374151; cursor: pointer;
+}
+.btn-ghost:hover { background: #f9fafb; }
+@media (prefers-color-scheme: dark) { .btn-ghost { color: #e5e7eb; border-color:#374151; } .btn-ghost:hover { background: #0b1220; } }
+
+/* Home hero/card variant */
+.hero-card {
+  background: #14b8a6; /* teal-500 */
+  border-radius: 1rem; padding: 2rem; text-align: center; box-shadow: 0 10px 15px rgba(2,6,23,0.08);
+}
+
+/* Start button in gray for home */
+.btn-start-gray {
+  display:inline-flex; align-items:center; justify-content:center; border-radius:9999px; padding:0.75rem 1.5rem;
+  background: var(--muted); color: #fff; font-weight:600; cursor:pointer; box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+}
+
+/* Responsive hero logo */
+.hero-logo {
+  display: block;
+  width: 100%;
+  max-width: 360px; /* limits how large the image grows */
+  height: auto;
+  object-fit: contain;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.muted { font-size: 0.875rem; color: var(--muted); }
+
+/* Small utilities */
+.row { display:flex; gap:1rem; align-items:center; }
+.col { display:flex; flex-direction:column; gap:0.75rem; }
+
+/* Setup page specific styles */
+.setup-page {
+  background: #20A39E; /* user-specified blue */
+  min-height: calc(100vh - 2rem);
+  color: #0f172a; /* dark text for readability */
+}
+
+.setup-page .inner-box {
+  background: #A4A9AD; /* user requested gray */
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-top: 1.25rem;
+  color: #0f172a; /* ensure dark text inside the box */
+}
+
+.slider {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 9999px;
+  outline: none;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px; border-radius: 50%; background: var(--accent); box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.role-row { display:flex; align-items:center; gap:1rem; }
+.role-label { flex: 1; text-align:center; color: #0f172a; }
+.role-icon { width:36px; height:36px; object-fit:contain; }
+
+.value-pill { width:36px; text-align:center; font-weight:600; color: #0f172a; }
+.name-item {
+  padding: 1rem 0;
+  border-radius: 0.75rem;
+  text-align: center;
+  color: #0f172a;
+}
+
+/* Make button text darker on setup page if necessary */
+.setup-page .btn, .setup-page .btn-ghost { color: #0f172a; }
+
+

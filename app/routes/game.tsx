@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from "react";
 
-// Flujo implementado:
-// 1) Se asignan roles y palabras (pares) y se mezclan con los nombres.
-// 2) Se muestra a cada jugador su palabra/rol uno a uno (botón "Siguiente").
-// 3) Al terminar la ronda de revelado aparece la vista de juego con botón "Expulsar".
-// 4) Al expulsar se calcula el ganador: si no quedan undercovers/impostores ganan civiles;
-//    si undercovers+impostors >= civilians gana el bando de los "malos".
-// 5) Se muestra mensaje de victoria y botones: "Reiniciar" y "Modificar jugadores".
-
 const WORD_PAIRS: string[] = [
   "gato","manzana","coche","casa","perro","mesa","silla","ventana","puerta","libro",
   "pluma","papel","bicicleta","sombrero","camisa","pantalón","zapato","ciudad","pueblo","montaña",
@@ -50,7 +42,6 @@ function shuffle<T>(arr: T[]) {
 
 export default function Game() {
   const isBrowser = typeof window !== "undefined" && typeof sessionStorage !== "undefined";
-
   const navState = isBrowser ? (window.history.state ?? {}) : {};
   const namesFromStorage = isBrowser ? (() => { try { const raw = sessionStorage.getItem("uc_names"); return raw ? JSON.parse(raw) as string[] : null } catch { return null } })() : null;
 
@@ -60,21 +51,17 @@ export default function Game() {
   const undercovers = navState.undercovers ?? (isBrowser ? Number(sessionStorage.getItem("uc_undercovers") || 0) : 0);
   const civilians = navState.civilians ?? (isBrowser ? Number(sessionStorage.getItem("uc_civilians") || 0) : Math.max(0, totalPlayers - impostors - undercovers));
 
-  // Build roles array and shuffle
   const roles: string[] = [];
   for (let i = 0; i < impostors; i++) roles.push("Impostor");
   for (let i = 0; i < undercovers; i++) roles.push("Undercover");
   for (let i = 0; i < civilians; i++) roles.push("Civilian");
   while (roles.length < totalPlayers) roles.push("Civilian");
-  const shuffledRoles = shuffle(roles);
 
-  // choose a single civilian word for everyone and build players; make this regenerable
   const [civilianWord, setCivilianWord] = useState(() => WORD_PAIRS[Math.floor(Math.random() * WORD_PAIRS.length)]);
 
   function generatePlayers(word: string) {
     const rolesLocal = roles.slice();
     const shuffledRolesLocal = shuffle(rolesLocal);
-    // shuffle names order too so order changes on restart
     const namesList = names.length ? shuffle(names.slice()) : Array.from({ length: totalPlayers }, (_, i) => `Jugador ${i + 1}`);
     return namesList.map((name, idx) => ({
       name,
@@ -92,10 +79,11 @@ export default function Game() {
   const [lastExpelled, setLastExpelled] = useState<string | null>(null);
   const [expelledThisRound, setExpelledThisRound] = useState(false);
   const [winningWord, setWinningWord] = useState<string | null>(null);
+  const [lastExpelledRole, setLastExpelledRole] = useState<string | null>(null);
+  const [lastExpelledWord, setLastExpelledWord] = useState<string | null>(null);
 
   useEffect(() => {
     if (winner === "Civilians" && winningWord) {
-      // show the winning word briefly then restart
       const t = setTimeout(() => {
         handleRestart();
       }, 2200);
@@ -115,6 +103,8 @@ export default function Game() {
     copy[idx] = { ...copy[idx], alive: false };
     setPlayersState(copy);
     setLastExpelled(expelledPlayer.name);
+    setLastExpelledRole(expelledPlayer.role);
+    setLastExpelledWord(expelledPlayer.word ?? null);
     setExpelledThisRound(true);
 
     const alive = copy.filter((p) => p.alive);
@@ -129,9 +119,18 @@ export default function Game() {
     }
   };
 
+  const continueAfterExpel = () => {
+    const shuffled = shuffle(playersState.slice());
+    setPlayersState(shuffled);
+    setLastExpelled(null);
+    setLastExpelledRole(null);
+    setLastExpelledWord(null);
+    setExpelledThisRound(false);
+    setExpelMode(false);
+  };
+
   const handleRestart = () => {
     if (!isBrowser) return;
-    // pick a different word if possible
     let newWord = WORD_PAIRS[Math.floor(Math.random() * WORD_PAIRS.length)];
     if (WORD_PAIRS.length > 1) {
       while (newWord === civilianWord) {
@@ -139,7 +138,6 @@ export default function Game() {
       }
     }
     setCivilianWord(newWord);
-    // regenerate players with new word and reshuffled roles
     setPlayersState(generatePlayers(newWord));
     setRevealIndex(0);
     setRevealingDone(false);
@@ -148,6 +146,8 @@ export default function Game() {
     setLastExpelled(null);
     setExpelledThisRound(false);
     setWinningWord(null);
+    setLastExpelledRole(null);
+    setLastExpelledWord(null);
   };
 
   const handleModifyPlayers = () => { if (isBrowser) window.location.href = "/setup" };
@@ -166,77 +166,150 @@ export default function Game() {
     );
   }
 
-  // Reveal view
+  // ======================
+  // VISTA 1: ASIGNACIÓN DE ROL/PALABRA (Captura 1)
+  // ======================
   if (!revealingDone) {
     const p = playersState[revealIndex];
+    const cardImage = p.role === "Impostor" ? "/impostor.png" : p.role === "Undercover" ? "/undercover.png" : "/civilician.png";
+    
     return (
-      <main className="app-container">
-        <div className="card text-center">
-          <h2 className="title">Turno de {p.name}</h2>
-          {p.role === "Impostor" ? (
-            <p className="mt-3">Rol: <strong>Impostor</strong></p>
-          ) : (
-            <p className="mt-3">Palabra: <em>{p.word}</em></p>
-          )}
-          <div className="mt-6">
-            <button className="btn" onClick={handleNextReveal}>Siguiente</button>
-            {revealIndex + 1 >= playersState.length && (
-              <button className="btn-ghost" onClick={() => setRevealingDone(true)} style={{ marginLeft: 8 }}>Terminar revelados</button>
-            )}
+      <main className="game-page">
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <img src="/logotipoimpostorcivillian.png" alt="logo" className="hero-logo" style={{ maxWidth: 100 }} />
+        </div>
+
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div className="inner-box" style={{ display: 'inline-block', padding: '0.75rem 1.5rem' }}>
+            <strong style={{ color: '#0f172a' }}>Jugador {p.name}</strong>
+          </div>
+        </div>
+
+        <div className="role-card">
+          <img src={cardImage} alt={p.role} />
+          <div className="role-card-label">
+            {p.role === "Impostor" ? "IMPOSTOR" : p.word ? p.word.toUpperCase() : "CIVILIAN"}
+          </div>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+          <div className="inner-box" style={{ display: 'inline-block', padding: '0.75rem 1.5rem', marginBottom: '1.5rem' }}>
+            <span style={{ color: '#0f172a' }}>Palabra/Impostor</span>
+          </div>
+          <div>
+            <button className="btn-start-gray" onClick={handleNextReveal}>Siguiente</button>
           </div>
         </div>
       </main>
     );
   }
 
-  // Main game view
-  return (
-    <main className="app-container">
-      <div className="card">
-        <h2 className="title">Partida</h2>
-        {winner ? (
-          <div className="mt-4">
-            <h3 className="text-xl">Victoria: {winner}</h3>
-            {winner === "Civilians" && winningWord && (
-              <p className="muted mt-2">La palabra era: <strong>{winningWord}</strong></p>
-            )}
-            <div className="mt-3 row">
-              <button className="btn" onClick={handleRestart}>Reiniciar</button>
-              <button className="btn-ghost" onClick={handleModifyPlayers}>Modificar jugadores</button>
-            </div>
-          </div>
-        ) : (
-          <>
-            {expelledThisRound && lastExpelled && (
-              <div className="p-3 mb-4 rounded bg-gray-100">
-                <strong>{lastExpelled} expulsado</strong>
-                <div className="mt-2">
-                  <button className="btn" onClick={() => { setExpelledThisRound(false); setLastExpelled(null); setExpelMode(false); }}>Siguiente</button>
-                </div>
-              </div>
-            )}
-            <div className="mt-4 row">
-              <button className="btn" onClick={() => setExpelMode((v) => !v)}>{expelMode ? "Cancelar expulsión" : "Expulsar"}</button>
-            </div>
+  // ======================
+  // VISTA 3: EXPULSIÓN (Captura 3)
+  // ======================
+  if (expelledThisRound && lastExpelled) {
+    const expelledImage = lastExpelledRole === "Impostor" ? "/impostor.png" : lastExpelledRole === "Undercover" ? "/undercover.png" : "/civilician.png";
+    
+    return (
+      <main className="game-page">
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <img src="/logotipoimpostorcivillian.png" alt="logo" className="hero-logo" style={{ maxWidth: 100 }} />
+        </div>
 
-            <ul className="mt-4 space-y-3">
-              {playersState.map((p, idx) => (
-                <li key={p.name} className={`p-4 rounded-lg border ${!p.alive ? "opacity-50" : ""}`}>
-                  <div className="row" style={{ justifyContent: "space-between" }}>
-                    <div>
-                      <strong className="text-lg">{p.name}</strong>
-                      <div className="muted">{p.alive ? "Vivo" : "Expulsado"}</div>
-                    </div>
-                    {expelMode && p.alive && (
-                      <button className="btn-ghost" onClick={() => handleExpel(idx)}>Expulsar</button>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div className="inner-box" style={{ display: 'inline-block', padding: '0.75rem 1.5rem' }}>
+            <strong style={{ color: '#0f172a' }}>{lastExpelled} Expulsado</strong>
+          </div>
+        </div>
+
+        <div className="role-card" style={{ marginBottom: '2rem' }}>
+          <img src={expelledImage} alt={String(lastExpelledRole)} />
+          <div className="role-card-label">
+            {lastExpelledRole === "Impostor" ? "IMPOSTOR" : "CIVILIAN"}
+          </div>
+        </div>
+
+        {/* Menú lateral con info de ganadores */}
+        <div className="side-menu">
+          <p><strong>Civilian Ganadores/</strong></p>
+          <p><strong>Impostores Ganadores/Undercovers Ganadores/</strong></p>
+          <p><strong>Seguir Jugando/ Reiniciar</strong></p>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+          {!winner && (
+            <button className="btn-start-gray" onClick={continueAfterExpel} style={{ marginBottom: '1rem', display: 'block', marginLeft: 'auto', marginRight: 'auto' }}>
+              Seguir jugando
+            </button>
+          )}
+          <button className="btn-start-gray" onClick={handleRestart} style={{ marginBottom: '1rem', display: 'block', marginLeft: 'auto', marginRight: 'auto' }}>
+            Reiniciar
+          </button>
+          <button className="btn-start-gray" onClick={handleModifyPlayers} style={{ display: 'block', marginLeft: 'auto', marginRight: 'auto' }}>
+            Modificar jugadores
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  // ======================
+  // VISTA 2: JUEGO PRINCIPAL - GRID INCOGNITO (Captura 2)
+  // ======================
+  const alivePlayers = playersState.filter(p => p.alive);
+
+  return (
+    <main className="game-page">
+      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+        <img src="/logotipoimpostorcivillian.png" alt="logo" className="hero-logo" style={{ maxWidth: 100 }} />
       </div>
+
+      {winner ? (
+        <div style={{ textAlign: 'center', padding: '2rem' }}>
+          <div className="inner-box" style={{ display: 'inline-block', padding: '1rem 2rem', marginBottom: '2rem' }}>
+            <h3 style={{ color: '#0f172a', margin: 0 }}>Victoria: {winner}</h3>
+            {winner === "Civilians" && winningWord && (
+              <p style={{ color: '#0f172a', margin: '0.5rem 0 0' }}>La palabra era: <strong>{winningWord}</strong></p>
+            )}
+          </div>
+          <div>
+            <button className="btn-start-gray" onClick={handleRestart} style={{ marginBottom: '1rem', display: 'block', marginLeft: 'auto', marginRight: 'auto' }}>
+              Reiniciar
+            </button>
+            <button className="btn-start-gray" onClick={handleModifyPlayers} style={{ display: 'block', marginLeft: 'auto', marginRight: 'auto' }}>
+              Modificar jugadores
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="player-grid">
+            {alivePlayers.map((p, idx) => {
+              const actualIdx = playersState.findIndex(pl => pl.name === p.name);
+              return (
+                <div 
+                  key={p.name} 
+                  className="player-card"
+                  onClick={() => expelMode && handleExpel(actualIdx)}
+                  style={{ cursor: expelMode ? 'pointer' : 'default', opacity: expelMode ? 1 : 0.9 }}
+                >
+                  <img src="/incognito.png" alt="Incognito" />
+                  <div className="player-card-name">{p.name}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+            <button 
+              className="btn-start-gray" 
+              onClick={() => setExpelMode(v => !v)}
+            >
+              {expelMode ? "Cancelar" : "Expulsar"}
+            </button>
+          </div>
+        </>
+      )}
     </main>
   );
 }

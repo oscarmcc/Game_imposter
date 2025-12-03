@@ -112,6 +112,107 @@ html, body {
 .row { display:flex; gap:1rem; align-items:center; }
 .col { display:flex; flex-direction:column; gap:0.75rem; }
 
+/* Game page styles */
+.game-page {
+  background: #20A39E;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+.role-card {
+  background: #6B46C1;
+  border: 4px solid #4C1D95;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  max-width: 280px;
+  margin: 0 auto;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.role-card img {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  margin: 0 auto;
+  display: block;
+}
+
+.role-card-label {
+  background: #A4A9AD;
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 1.125rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 1rem;
+  margin-top: 1.5rem;
+  text-transform: uppercase;
+}
+
+.player-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.player-card {
+  background: #A4A9AD;
+  border-radius: 1rem;
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.player-card:hover {
+  transform: scale(1.02);
+}
+
+.player-card img {
+  width: 100%;
+  max-width: 120px;
+  height: auto;
+  margin: 0 auto;
+  display: block;
+}
+
+.player-card-name {
+  background: #A4A9AD;
+  color: #0f172a;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.expelled-view {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.side-menu {
+  position: fixed;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.95);
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  max-width: 200px;
+}
+
+.side-menu p {
+  font-size: 0.85rem;
+  margin: 0.25rem 0;
+  color: #0f172a;
+}
+
 /* Setup page specific styles */
 .setup-page {
   background: #20A39E; /* user-specified blue */
@@ -150,6 +251,110 @@ html, body {
   border-radius: 0.75rem;
   text-align: center;
   color: #0f172a;
+}
+
+/* Game page styles */
+.game-page {
+  background: #20A39E;
+  min-height: calc(100vh - 2rem);
+  color: #0f172a;
+}
+
+.role-card {
+  border: 4px solid #7c3aed; /* purple border */
+  border-radius: 1rem;
+  padding: 1rem;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.role-card img {
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.player-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.player-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.player-card img {
+  width: 100%;
+  max-width: 120px;
+  height: auto;
+  border: 3px solid #A4A9AD;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+
+.player-card img:hover {
+  transform: scale(1.05);
+  border-color: #7c3aed;
+}
+
+.player-card.dead img {
+  opacity: 0.5;
+  filter: grayscale(100%);
+}
+
+.player-name-label {
+  background: #A4A9AD;
+  color: #0f172a;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-align: center;
+  min-width: 100px;
+}
+
+.expelled-view {
+  background: rgba(255,255,255,0.95);
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.expelled-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+.expelled-card {
+  border: 4px solid #7c3aed;
+  border-radius: 1rem;
+  padding: 1rem;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(124,58,237,0.25);
+}
+
+.expelled-card img {
+  display: block;
+  width: 180px;
+  height: auto;
+}
+
+.expelled-info {
+  max-width: 320px;
+  text-align: left;
 }
 
 /* Make button text darker on setup page if necessary */

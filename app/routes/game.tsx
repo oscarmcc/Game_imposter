@@ -196,16 +196,22 @@ export default function Game() {
           </div>
         </div>
 
-        <div className="role-card">
-          <img src={cardImage} alt={p.role} />
+        <div 
+          className="role-card" 
+          onClick={() => !roleRevealed && setRoleRevealed(true)}
+          style={{ cursor: roleRevealed ? 'default' : 'pointer' }}
+        >
+          <img src={roleRevealed ? cardImage : "/incognito.png"} alt={roleRevealed ? p.role : "???"} />
           <div className="role-card-label">
-            {p.role === "Impostor" ? "IMPOSTOR" : p.word ? p.word.toUpperCase() : "CIVILIAN"}
+            {roleRevealed 
+              ? (p.role === "Impostor" ? "IMPOSTOR" : p.word ? p.word.toUpperCase() : "CIVILIAN")
+              : "???"}
           </div>
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '2rem' }}>
           <div className="inner-box" style={{ display: 'inline-block', padding: '0.75rem 1.5rem', marginBottom: '1.5rem' }}>
-            <span style={{ color: '#0f172a' }}>Palabra/Impostor</span>
+            <span style={{ color: '#0f172a' }}>{roleRevealed ? "Palabra/Impostor" : "Toca la carta para revelar"}</span>
           </div>
           <div>
             <button className="btn-start-gray" onClick={handleNextReveal}>Siguiente</button>
